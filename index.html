@@ -1,68 +1,137 @@
-= index.html
-pool.splice(idx,1);
-}
-return out;
-}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Skyrim Starter Randomizer</title>
+  <meta name="theme-color" content="#0f172a" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <style>
+    :root{--bg1:#f8fafc;--bg2:#eef2ff;--ink:#0f172a;--muted:#64748b;--card:#ffffff;--ring:rgba(0,0,0,.08);--accent:#0f172a}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Ubuntu,Arial,sans-serif;color:var(--ink);background:linear-gradient(180deg,var(--bg1),var(--bg2));}
+    .wrap{max-width:760px;margin:0 auto;padding:24px}
+    h1{margin:0 0 8px;font-size:24px;font-weight:800}
+    .sub{color:var(--muted);font-size:12px}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}}
+    .card{background:var(--card);border-radius:16px;padding:14px 16px;box-shadow:0 1px 1px var(--ring),0 8px 24px -18px rgba(2,6,23,.4);border:1px solid var(--ring)}
+    .label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+    .value{min-height:28px;font-weight:700;font-size:18px}
+    .row-span-2{grid-column:1/-1}
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    button{appearance:none;border:1px solid var(--ring);background:#fff;border-radius:16px;padding:12px 16px;font-weight:700}
+    .spin{background:var(--accent);color:#fff;border-color:transparent}
+    .spin:disabled{opacity:.6}
+    .hint{margin-top:18px;color:var(--muted);font-size:12px}
+    .footer{margin-top:28px;color:var(--muted);font-size:11px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Skyrim Starter Randomizer</h1>
+    <div class="sub">Tap SPIN to roll a fresh loadout. (Skills will never repeat.)</div>
 
+    <div class="grid" id="fields">
+      <div class="card"><div class="label">Race</div><div id="race" class="value">—</div></div>
+      <div class="card"><div class="label">Primary Skill</div><div id="primary" class="value">—</div></div>
+      <div class="card"><div class="label">Secondary Skill 1</div><div id="secondary1" class="value">—</div></div>
+      <div class="card"><div class="label">Secondary Skill 2</div><div id="secondary2" class="value">—</div></div>
+      <div class="card row-span-2"><div class="label">Quest</div><div id="quest" class="value">—</div></div>
+    </div>
 
-let spinning=false, interval=null, timeout=null;
+    <div class="btns">
+      <button class="spin" id="spinBtn">SPIN</button>
+      <button id="clearBtn">Clear</button>
+      <button id="copyBtn">Copy Result</button>
+    </div>
 
+    <div class="hint">Pro tip: Install to your home screen (Chrome → menu → Add to Home screen). Works offline after first load.</div>
+    <div class="footer">Made for quick Skyrim rerolls on the go.</div>
+  </div>
 
-function tick(){
-const [p,s1,s2] = uniqueSkills(3);
-els.race.textContent = rand(RACES);
-els.primary.textContent = p;
-els.secondary1.textContent = s1;
-els.secondary2.textContent = s2;
-els.quest.textContent = rand(QUESTS);
-}
+  <script>
+    const RACES = ["Argonian","Breton","Dark Elf","Altmer","Imperial","Khajiit","Nord","Orc","Redguard","Wood Elf"];
+    const SKILLS = ["Alteration","Archery","Alchemy","Conjuration","Block","Light Armor","Destruction","Heavy Armor","Lockpicking","Enchanting","One-handed","Pickpocket","Illusion","Smithing","Sneak","Restoration","Two-handed","Speech"];
+    const QUESTS = [
+      "Main Questline","Dragonborn","Dawnguard","Civil War","Companions","Thieves Guild","Dark Brotherhood",
+      "Azura","Boethiah","Clavicus Vile","Hermeus Mora","Hiricine","Malacath","Mehrunes Dagon","Mephala","Molag Bal","Namira","Nocturnal","Peryite","Sanguine","Sheogorath","Vaerrmina"
+    ];
 
+    const els = {
+      race: document.getElementById('race'),
+      primary: document.getElementById('primary'),
+      secondary1: document.getElementById('secondary1'),
+      secondary2: document.getElementById('secondary2'),
+      quest: document.getElementById('quest'),
+      spinBtn: document.getElementById('spinBtn'),
+      clearBtn: document.getElementById('clearBtn'),
+      copyBtn: document.getElementById('copyBtn'),
+    };
 
-function spin(){
-if(spinning) return;
-spinning = true;
-els.spinBtn.disabled = true;
-if(navigator.vibrate) navigator.vibrate(10);
-tick();
-interval = setInterval(tick, 70);
-timeout = setTimeout(()=>{
-clearInterval(interval);
-tick();
-spinning=false;
-els.spinBtn.disabled = false;
-if(navigator.vibrate) navigator.vibrate([8,40,8]);
-}, 2000);
-}
+    function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+    function uniqueSkills(n){
+      const pool = SKILLS.slice();
+      const out = [];
+      for(let i=0;i<n;i++){
+        const idx = Math.floor(Math.random()*pool.length);
+        out.push(pool[idx]);
+        pool.splice(idx,1);
+      }
+      return out;
+    }
 
+    let spinning=false, interval=null, timeout=null;
 
-function clearAll(){
-['race','primary','secondary1','secondary2','quest'].forEach(k=>els[k].textContent='—');
-}
+    function tick(){
+      const [p,s1,s2] = uniqueSkills(3);
+      els.race.textContent = rand(RACES);
+      els.primary.textContent = p;
+      els.secondary1.textContent = s1;
+      els.secondary2.textContent = s2;
+      els.quest.textContent = rand(QUESTS);
+    }
 
+    function spin(){
+      if(spinning) return;
+      spinning = true;
+      els.spinBtn.disabled = true;
+      if(navigator.vibrate) navigator.vibrate(10);
+      tick();
+      interval = setInterval(tick, 70);
+      timeout = setTimeout(()=>{
+        clearInterval(interval);
+        tick();
+        spinning=false;
+        els.spinBtn.disabled = false;
+        if(navigator.vibrate) navigator.vibrate([8,40,8]);
+      }, 2000);
+    }
 
-async function copyResult(){
-const text = `Race: ${els.race.textContent}\nPrimary Skill: ${els.primary.textContent}\nSecondary Skill 1: ${els.secondary1.textContent}\nSecondary Skill 2: ${els.secondary2.textContent}\nQuest: ${els.quest.textContent}`;
-try{
-await navigator.clipboard.writeText(text);
-alert('Copied loadout to clipboard!');
-}catch(e){
-alert('Could not copy to clipboard in this environment.');
-}
-}
+    function clearAll(){
+      ['race','primary','secondary1','secondary2','quest'].forEach(k=>els[k].textContent='—');
+    }
 
+    async function copyResult(){
+      const text = `Race: ${els.race.textContent}\nPrimary Skill: ${els.primary.textContent}\nSecondary Skill 1: ${els.secondary1.textContent}\nSecondary Skill 2: ${els.secondary2.textContent}\nQuest: ${els.quest.textContent}`;
+      try{
+        await navigator.clipboard.writeText(text);
+        alert('Copied loadout to clipboard!');
+      }catch(e){
+        alert('Could not copy to clipboard in this environment.');
+      }
+    }
 
-els.spinBtn.addEventListener('click', spin);
-els.clearBtn.addEventListener('click', clearAll);
-els.copyBtn.addEventListener('click', copyResult);
+    els.spinBtn.addEventListener('click', spin);
+    els.clearBtn.addEventListener('click', clearAll);
+    els.copyBtn.addEventListener('click', copyResult);
 
-
-// Register service worker for offline use
-if('serviceWorker' in navigator){
-window.addEventListener('load', ()=>{
-navigator.serviceWorker.register('./sw.js').catch(()=>{});
-});
-}
-</script>
+    if('serviceWorker' in navigator){
+      window.addEventListener('load', ()=>{
+        navigator.serviceWorker.register('./sw.js').catch(()=>{});
+      });
+    }
+  </script>
 </body>
-
 </html>
